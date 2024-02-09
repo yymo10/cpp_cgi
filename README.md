@@ -29,6 +29,19 @@ This CGI class is written in C++ and offers basic CGI (Common Gateway Interface)
 ### Usage Example
 This class is useful for handling user input and managing sessions in web applications. For instance, when a user submits information through a form, this class can be used to parse and process the data. Additionally, the session ID can be used to identify a user's session for authentication or state management purposes.
 
+### Compilation Guide
+To compile a C++ program that includes the CGI class, you need a C++ compiler such as `g++` or `clang++`. Here is a basic example of how to compile a program with `g++`:
+
+1. Save your program that includes the CGI class to a file, for example, `main.cpp`.
+2. Open your terminal or command prompt.
+3. Navigate to the directory where `main.cpp` is located.
+4. Compile the program using the following command:
+```sh
+g++ main.cpp -std=c++11 -o ./cgi/main.cgi
+```
+This command tells `g++` to compile `main.cpp` and output an executable named `./cgi/main.cgi`.
+
+
 ### Notes
 - The `parse_post_data()` method uses `std::cin` to read POST data, so it only works in a CGI environment.
 - The `POST_` method can result in undefined behavior if the key is not found, so it's important to either verify the key's existence beforehand or implement proper exception handling in actual use.
@@ -80,7 +93,6 @@ This library is open-source and licensed under MIT License. Feel free to use it 
 ## ソースコード
 ### CGIクラス
 このCGIクラスは、C++で記述されたWebアプリケーションのための基本的なCGI (Common Gateway Interface) 処理機能を提供します。このクラスを使用することで、WebフォームからのGETまたはPOSTリクエストを簡単に処理し、セッションIDを生成して管理することができます。以下に、各メソッドの概要を説明します。
-
 #### コンストラクタ
 - CGI(): クラスのインスタンスが生成されると自動的にセッションIDを生成します。
 #### メソッド
@@ -100,6 +112,18 @@ POST_メソッドは、キーが見つからない場合に未定義の動作を
 
 SESSION_IDメソッドは、セッションIDが空でない場合にのみその値を返しますが、通常はセッションIDが生成されていない状況は発生しません。
 このクラスは、C++でCGIベースのWebアプリケーションを開発する際の基盤として利用でき、フォームデータの処理やセッション管理を容易にします。
+
+### コンパイル手順について
+C++で記述されたCGIクラスを含むプログラムをコンパイルするには、`g++`や`clang++`などのC++コンパイラが必要です。以下に`g++`を使用したプログラムのコンパイル例を示します。
+
+1. CGIクラスを含むプログラムを`main.cpp`というファイルに保存します。
+2. ターミナルまたはコマンドプロンプトを開きます。
+3. `main.cpp`が存在するディレクトリにナビゲートします。
+4. 以下のコマンドを使用してプログラムをコンパイルします。
+```sh
+g++ main.cpp -std=c++11 -o ./cgi/main.cgi
+```
+このコマンドは`g++`に`main.cpp`をコンパイルし、実行可能ファイル`./cgi/main.cgi`を出力するよう指示します。
 
 ## 使い方
 
