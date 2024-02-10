@@ -13,12 +13,21 @@
  */
 void HtmlHeader(std::string lang,std::string charset,std::string title,std::string head=""){
        std::cout << "Content-type: text/html\n\n";
-       std::cout << "<!DOCTYPE html><html lang="+lang+"><head><meta charset="+charset+"><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"+title+"</title>"+head+"</head>";
+       std::cout << "<!DOCTYPE html><html lang='"+lang+"'><head><meta charset='"+charset+"'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"+title+"</title>"+head+"</head>";
 }
-
-void HtmlFooter(){
-    std::cout <<"</body></html>" << std::endl;
+/**
+ * HtmlFooter 関数
+ * </body>と</html>を挿入する関数
+ * @param {string} footer: </body>と</html>の間に挿入するテキスト初期値は""
+*/
+void HtmlFooter(std::string footer=""){
+    std::cout <<"</body>"+footer+"</html>" << std::endl;
 }
+/**
+ * v 関数
+ * @param {string} view: 挿入したいテキスト
+ * std::coutを省略した関数
+*/
 void v(std::string view){
     if(view!=""){
         std::cout << view << std::endl;
@@ -26,7 +35,7 @@ void v(std::string view){
 }
 
 class CGI{
-            std::string sessionId_;
+        std::string sessionId_;
         public:
         CGI(){
             GenerateSessionId();
@@ -34,8 +43,7 @@ class CGI{
 
         std::map<std::string, std::string> parseQueryString() {
             std::map<std::string, std::string> data;
-            std::string query_string = getenv("QUERY_STRING"); // 環境変数からQUERY_STRINGを取得
-
+            std::string query_string = getenv("QUERY_STRING");
             std::string key, value;
             size_t pos = 0;
             while ((pos = query_string.find('=')) != std::string::npos) {
@@ -54,9 +62,14 @@ class CGI{
 
             return data;
         }
+        /**
+         * parse_　メゾット
+         * @param {String} param: GETのパラメータを設定
+         * @return { string　or int } : 第一引数に設定されたGETの値を取得 
+        */
         std::map<std::string, std::string> parse_post_data() {
             std::string post_data;
-            std::cin >> post_data; // POSTデータを標準入力から読み取る
+            std::cin >> post_data;
 
             std::map<std::string, std::string> data_map;
             std::istringstream data_stream(post_data);
@@ -76,7 +89,7 @@ class CGI{
 
         /**
          * POST_　メゾット
-         * @param {String} : GETのパラメータを設定
+         * @param {String} param: GETのパラメータを設定
          * @return { string　or int } : 第一引数に設定されたGETの値を取得 
         */
         std::string POST_(std::string param){
@@ -86,7 +99,7 @@ class CGI{
         }
         /**
          * GET_　メゾット
-         * @param {String} : GETのパラメータを設定
+         * @param {String} param: GETのパラメータを設定
          * @return { string　or int } : 第一引数に設定されたGETの値を取得 
         */
         std::string GET_(std::string param){
@@ -105,7 +118,7 @@ class CGI{
 
         /**
          * REQUEST_　メゾット
-         * @param {String} : GETまたはPOSTのパラメータを設定
+         * @param {String} param: GETまたはPOSTのパラメータを設定
          * @return { string　or int } : 第一引数に設定されたGETまたはPOSTの値を取得 
         */
         std::string REQUEST_(std::string param){
@@ -115,21 +128,25 @@ class CGI{
                 std::string requestMethod(method);
 
                 if (requestMethod == "GET") {
-                    // GETリクエストの場合の処理
                 value = this->GET_(param);
                 } else if (requestMethod == "POST") {
-                    // POSTリクエストの場合の処理
                 value = this->POST_(param);
                 }
             }
             return value;
         }
-
+        /**
+         * GenerateSessionId メゾット
+         * sessionId_にセッションIDの乱数を生成代入（CGIクラスのインスタンスで初期化実行）
+        */
         void GenerateSessionId() {
             srand(time(0));
             sessionId_ = std::to_string(rand());
         }
-
+        /**
+         * SESSION_ID　メゾット
+         * @return { string } id: セッションIDを発行
+        */
         std::string SESSION_ID(){
             std::string id;
             if(sessionId_!=""){
