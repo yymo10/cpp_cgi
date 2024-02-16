@@ -1,3 +1,5 @@
+- [English Document](https://github.com/yymo10/cpp_cgi?tab=readme-ov-file#c-cgi-library-english)
+- [日本語ドキュメント](https://github.com/yymo10/cpp_cgi?tab=readme-ov-file#c-cgi-%E3%83%A9%E3%82%A4%E3%83%96%E3%83%A9%E3%83%AA-%E6%97%A5%E6%9C%AC%E8%AA%9E)
 # C++ CGI Library [English]
 
 This library provides a simple interface for creating CGI (Common Gateway Interface) applications in C++. It enables the handling of GET and POST requests, parsing query strings and POST data, and managing session IDs.
