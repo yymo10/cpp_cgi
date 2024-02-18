@@ -34,30 +34,54 @@ void v(std::string view){
 
 class CGI{
         std::string sessionId_;
+        int status;
         public:
+        std::string emsg;
         CGI(){
-            GenerateSessionId();
+            try{
+                GenerateSessionId();
+                if(sessionId_==""){
+                    throw std::runtime_error("Error: Session ID is not initialized.");
+                }
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg = e.what();
+                this->status=500;
+            }
         }
 
         std::map<std::string, std::string> parseQueryString() {
             std::map<std::string, std::string> data;
             std::string query_string = getenv("QUERY_STRING");
             std::string key, value;
-            size_t pos = 0;
-            while ((pos = query_string.find('=')) != std::string::npos) {
-                key = query_string.substr(0, pos);
-                query_string.erase(0, pos + 1);
-                pos = query_string.find('&');
-                if (pos == std::string::npos) {
-                    value = query_string;
-                    query_string = "";
-                } else {
-                    value = query_string.substr(0, pos);
-                    query_string.erase(0, pos + 1);
-                }
-                data[key] = value;
+            try{
+                size_t pos = 0;
+                    while ((pos = query_string.find('=')) != std::string::npos) {
+                        key = query_string.substr(0, pos);
+                        query_string.erase(0, pos + 1);
+                        pos = query_string.find('&');
+                        if (pos == std::string::npos) {
+                            value = query_string;
+                            query_string = "";
+                        } else {
+                            value = query_string.substr(0, pos);
+                            query_string.erase(0, pos + 1);
+                        }
+                        data[key] = value;
+                    }
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg = e.what();
+                this->status=500;
             }
-
             return data;
         }
         /**
@@ -68,20 +92,28 @@ class CGI{
         std::map<std::string, std::string> parse_post_data() {
             std::string post_data;
             std::cin >> post_data;
-
             std::map<std::string, std::string> data_map;
-            std::istringstream data_stream(post_data);
-            std::string pair;
+            try{
+                std::istringstream data_stream(post_data);
+                std::string pair;
 
-            while (std::getline(data_stream, pair, '&')) {
-                auto delimiter_pos = pair.find('=');
-                if (delimiter_pos != std::string::npos) {
-                    std::string key = pair.substr(0, delimiter_pos);
-                    std::string value = pair.substr(delimiter_pos + 1);
-                    data_map[key] = value;
+                while (std::getline(data_stream, pair, '&')) {
+                    auto delimiter_pos = pair.find('=');
+                    if (delimiter_pos != std::string::npos) {
+                        std::string key = pair.substr(0, delimiter_pos);
+                        std::string value = pair.substr(delimiter_pos + 1);
+                        data_map[key] = value;
+                    }
                 }
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg = e.what();
+                this->status=500;
             }
-
             return data_map;
         }
 
@@ -101,15 +133,28 @@ class CGI{
          * @return { string　or int } : 第一引数に設定されたGETの値を取得 
         */
         std::string GET_(std::string param){
-
-            auto get_data = parseQueryString();
             std::string _value;
-            for (auto& pair : get_data) {
-                if(param == pair.first){
-                    _value=pair.second;
-                }else{
-                    _value="";
+            try{
+                auto get_data = parseQueryString();
+                for (auto& pair : get_data) {
+                    if(param == pair.first){
+                        _value=pair.second;
+                    }else{
+                        _value="";
+                    }
                 }
+                throw std::runtime_error("エラーが発生しました");
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+                std::cerr << e.what() << '\n';
             }
             return _value;
         }
@@ -122,14 +167,30 @@ class CGI{
         std::string REQUEST_(std::string param){
             const char* method = std::getenv("REQUEST_METHOD");
             std::string value;
-            if (method != nullptr) { // 環境変数が設定されているか確認
-                std::string requestMethod(method);
-
-                if (requestMethod == "GET") {
-                value = this->GET_(param);
-                } else if (requestMethod == "POST") {
-                value = this->POST_(param);
+            try
+            {
+                if(param==""){
+                    throw std::runtime_error("Error: Parameter value is not set.");
+                }else{
+                    if (method != nullptr) {
+                        std::string requestMethod(method);
+                        if (requestMethod == "GET") {
+                            value = this->GET_(param);
+                        } else if (requestMethod == "POST") {
+                            value = this->POST_(param);
+                        }
+                    }else{
+                        throw std::runtime_error("Error: Method value is not set.");
+                    }
                 }
+            }catch(const std::runtime_error& e){
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e)
+            {
+                this->emsg = e.what();
+                this->status=500;
+                std::cerr << e.what() << '\n';
             }
             return value;
         }
@@ -147,10 +208,21 @@ class CGI{
         */
         std::string SESSION_ID(){
             std::string id;
-            if(sessionId_!=""){
-                id = sessionId_;
-            }else{
-                id = "";
+            try{
+                if(sessionId_!=""){
+                    id = sessionId_;
+                }else{
+                    id = "";
+                    throw std::runtime_error("Error:Session ID is not initialized.");
+                }
+            }catch(const std::runtime_error& e){
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e)
+            {
+                this->emsg = e.what();
+                this->status=500;
+                std::cerr << e.what() << '\n';
             }
             return id;
         }
