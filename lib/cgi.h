@@ -13,53 +13,84 @@
  */
 void HtmlHeader(std::string lang,std::string charset,std::string title,std::string head=""){
        std::cout << "Content-type: text/html\n\n";
-       std::cout << "<!DOCTYPE html><html lang='"+lang+"'><head><meta charset='"+charset+"'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"+title+"</title>"+head+"</head>";
+       std::cout << "<!DOCTYPE html><html lang="+lang+"><head><meta charset="+charset+"><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"+title+"</title>"+head+"</head>";
 }
-/**
- * HtmlFooter 関数
- * </body>と</html>を挿入する関数
- * @param {string} footer: </body>と</html>の間に挿入するテキスト初期値は""
-*/
-void HtmlFooter(std::string footer=""){
-    std::cout <<"</body>"+footer+"</html>" << std::endl;
+
+void HtmlFooter(){
+    std::cout <<"</body></html>" << std::endl;
 }
-/**
- * v 関数
- * @param {string} view: 挿入したいテキスト
- * std::coutを省略した関数
-*/
-void v(std::string view){
-    if(view!=""){
+template<typename T>
+void v(T view){
         std::cout << view << std::endl;
-    }
 }
 
 class CGI{
-        std::string sessionId_;
+            std::string sessionId_;
+            std::string emsg;
         public:
+        int status;
         CGI(){
-            GenerateSessionId();
+            try{
+                GenerateSessionId();
+                if(sessionId_==""){
+                    throw std::runtime_error("Error: Session ID is not initialized.");
+                }
+                this->status=200;
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg = e.what();
+                this->status=500;
+            }
         }
-
+        std::string error_msg(){
+            std::string msg;
+            try{
+                msg = this->emsg;
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg = e.what();
+                this->status=500;
+            }
+            return msg;
+        }
         std::map<std::string, std::string> parseQueryString() {
             std::map<std::string, std::string> data;
-            std::string query_string = getenv("QUERY_STRING");
-            std::string key, value;
-            size_t pos = 0;
-            while ((pos = query_string.find('=')) != std::string::npos) {
-                key = query_string.substr(0, pos);
-                query_string.erase(0, pos + 1);
-                pos = query_string.find('&');
-                if (pos == std::string::npos) {
-                    value = query_string;
-                    query_string = "";
-                } else {
-                    value = query_string.substr(0, pos);
-                    query_string.erase(0, pos + 1);
-                }
-                data[key] = value;
-            }
+            std::string query_string = getenv("QUERY_STRING"); // 環境変数からQUERY_STRINGを取得
 
+            std::string key, value;
+            try{
+                size_t pos = 0;
+                    while ((pos = query_string.find('=')) != std::string::npos) {
+                        key = query_string.substr(0, pos);
+                        query_string.erase(0, pos + 1);
+                        pos = query_string.find('&');
+                        if (pos == std::string::npos) {
+                            value = query_string;
+                            query_string = "";
+                        } else {
+                            value = query_string.substr(0, pos);
+                            query_string.erase(0, pos + 1);
+                        }
+                        data[key] = value;
+                    }
+                this->status=200;
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg = e.what();
+                this->status=500;
+            }
             return data;
         }
         /**
@@ -69,21 +100,30 @@ class CGI{
         */
         std::map<std::string, std::string> parse_post_data() {
             std::string post_data;
-            std::cin >> post_data;
+            std::cin >> post_data; // POSTデータを標準入力から読み取る
 
             std::map<std::string, std::string> data_map;
-            std::istringstream data_stream(post_data);
-            std::string pair;
-
-            while (std::getline(data_stream, pair, '&')) {
-                auto delimiter_pos = pair.find('=');
-                if (delimiter_pos != std::string::npos) {
-                    std::string key = pair.substr(0, delimiter_pos);
-                    std::string value = pair.substr(delimiter_pos + 1);
-                    data_map[key] = value;
+            try{
+                std::istringstream data_stream(post_data);
+                std::string pair;
+                while (std::getline(data_stream, pair, '&')) {
+                    auto delimiter_pos = pair.find('=');
+                    if (delimiter_pos != std::string::npos) {
+                        std::string key = pair.substr(0, delimiter_pos);
+                        std::string value = pair.substr(delimiter_pos + 1);
+                        data_map[key] = value;
+                    }
                 }
+                this->status=200;
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg = e.what();
+                this->status=500;
             }
-
             return data_map;
         }
 
@@ -103,15 +143,27 @@ class CGI{
          * @return { string　or int } : 第一引数に設定されたGETの値を取得 
         */
         std::string GET_(std::string param){
-
-            auto get_data = parseQueryString();
             std::string _value;
-            for (auto& pair : get_data) {
-                if(param == pair.first){
-                    _value=pair.second;
-                }else{
-                    _value="";
+            try{
+                auto get_data = parseQueryString();
+                for (auto& pair : get_data) {
+                    if(param == pair.first){
+                        _value=pair.second;
+                    }else{
+                        _value="";
+                    }
                 }
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+                std::cerr << e.what() << '\n';
             }
             return _value;
         }
@@ -128,8 +180,10 @@ class CGI{
                 std::string requestMethod(method);
 
                 if (requestMethod == "GET") {
+                    // GETリクエストの場合の処理
                 value = this->GET_(param);
                 } else if (requestMethod == "POST") {
+                    // POSTリクエストの場合の処理
                 value = this->POST_(param);
                 }
             }
@@ -149,10 +203,22 @@ class CGI{
         */
         std::string SESSION_ID(){
             std::string id;
-            if(sessionId_!=""){
-                id = sessionId_;
-            }else{
-                id = "";
+            try{
+                if(sessionId_!=""){
+                    id = sessionId_;
+                }else{
+                    id = "";
+                    throw std::runtime_error("Error:Session ID is not initialized.");
+                }
+                this->status=200;
+            }catch(const std::runtime_error& e){
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e)
+            {
+                this->emsg = e.what();
+                this->status=500;
+                std::cerr << e.what() << '\n';
             }
             return id;
         }
