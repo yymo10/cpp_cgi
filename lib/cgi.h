@@ -15,8 +15,11 @@ void HtmlHeader(std::string lang,std::string charset,std::string title,std::stri
        std::cout << "Content-type: text/html\n\n";
        std::cout << "<!DOCTYPE html><html lang=" << lang <<"><head><meta charset=" << charset <<"><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"<< title << "</title>" << head <<"</head>";
 }
-
-void JsonHeader(std::string charset){
+/**
+ * JsonHeader 関数
+ * @param {string} charset : 文字セットを設定する（初期値はutf-8）
+*/
+void JsonHeader(std::string charset="utf-8"){
     std::cout << "Content-type: application/json;charset="<< charset <<"\n\n";
 }
 
