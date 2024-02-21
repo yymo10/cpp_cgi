@@ -15,6 +15,11 @@ void HtmlHeader(std::string lang,std::string charset,std::string title,std::stri
        std::cout << "Content-type: text/html\n\n";
        std::cout << "<!DOCTYPE html><html lang=" << lang <<"><head><meta charset=" << charset <<"><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"<< title << "</title>" << head <<"</head>";
 }
+
+void JsonHeader(std::string charset){
+    std::cout << "Content-type: application/json;charset="<< charset <<"\n\n";
+}
+
 /**
  * HtmlFooter 関数
  * @return {void} :</body>と</html>を挿入する関数
@@ -42,6 +47,24 @@ class CGI{
                 if(sessionId_==""){
                     throw std::runtime_error("Error: Session ID is not initialized.");
                 }
+                this->status=200;
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg = e.what();
+                this->status=500;
+            }
+        }
+        ~CGI(){
+            try{
+                GenerateSessionId();
+                if(sessionId_==""){
+                    throw std::runtime_error("Error: Session ID is not initialized.");
+                }
+                this->status=200;
             }catch(const std::runtime_error& e){
                 std::cerr << e.what() << std::endl;
                 this->emsg = e.what();
@@ -171,7 +194,31 @@ class CGI{
             }
             return _value;
         }
-
+        /**
+         * REFERER_　メゾット
+         * @return {string} : 取得したリファラを返す
+        */
+        std::string REFERER_(){
+            std::string ref;
+            try
+            {
+                char* referer = std::getenv("HTTP_REFERER");
+                if (referer == nullptr) {
+                    throw std::runtime_error("Error: Referer is not set.");
+                    return "";
+                } else {
+                    ref = std::string(referer);
+                }
+            }catch(const std::runtime_error& e){
+                this->emsg = e.what();
+                this->status=500;
+            }
+            catch(const std::exception& e)
+            {
+                std::cerr << e.what() << '\n';
+            }
+            return ref;
+        }
         /**
          * REQUEST_　メゾット
          * @param {String} param: GETまたはPOSTのパラメータを設定
