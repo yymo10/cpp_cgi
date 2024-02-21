@@ -13,7 +13,7 @@
  */
 void HtmlHeader(std::string lang,std::string charset,std::string title,std::string head=""){
        std::cout << "Content-type: text/html\n\n";
-       std::cout << "<!DOCTYPE html><html lang=" << lang <<"><head><meta charset=" << charset <<"><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"<< title << "</title>" << head <<"</head>";
+       std::cout << "<!DOCTYPE html><html lang="+lang+"><head><meta charset="+charset+"><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"+title+"</title>"+head+"</head>";
 }
 /**
  * JsonHeader 関数
@@ -30,18 +30,14 @@ void JsonHeader(std::string charset="utf-8"){
 void HtmlFooter(){
     std::cout <<"</body></html>" << std::endl;
 }
-/**
- * v 関数
- * std::coutを省略した関数
-*/
 template<typename T>
-void v(const T& view){
+void v(T view){
         std::cout << view << std::endl;
 }
 
 class CGI{
-        std::string sessionId_;
-        std::string emsg;
+            std::string sessionId_;
+            std::string emsg;
         public:
         int status;
         CGI(){
@@ -95,7 +91,8 @@ class CGI{
         }
         std::map<std::string, std::string> parseQueryString() {
             std::map<std::string, std::string> data;
-            std::string query_string = std::getenv("QUERY_STRING");
+            std::string query_string = getenv("QUERY_STRING"); // 環境変数からQUERY_STRINGを取得
+
             std::string key, value;
             try{
                 size_t pos = 0;
@@ -131,7 +128,8 @@ class CGI{
         */
         std::map<std::string, std::string> parse_post_data() {
             std::string post_data;
-            std::cin >> post_data;
+            std::cin >> post_data; // POSTデータを標準入力から読み取る
+
             std::map<std::string, std::string> data_map;
             try{
                 std::istringstream data_stream(post_data);
@@ -230,31 +228,16 @@ class CGI{
         std::string REQUEST_(std::string param){
             const char* method = std::getenv("REQUEST_METHOD");
             std::string value;
-            try
-            {
-                if(param==""){
-                    throw std::runtime_error("Error: Parameter value is not set.");
-                }else{
-                    if (method != nullptr) {
-                        std::string requestMethod(method);
-                        if (requestMethod == "GET") {
-                            value = this->GET_(param);
-                        } else if (requestMethod == "POST") {
-                            value = this->POST_(param);
-                        }
-                        this->status=200;
-                    }else{
-                        throw std::runtime_error("Error: Method value is not set.");
-                    }
+            if (method != nullptr) { // 環境変数が設定されているか確認
+                std::string requestMethod(method);
+
+                if (requestMethod == "GET") {
+                    // GETリクエストの場合の処理
+                value = this->GET_(param);
+                } else if (requestMethod == "POST") {
+                    // POSTリクエストの場合の処理
+                value = this->POST_(param);
                 }
-            }catch(const std::runtime_error& e){
-                this->emsg = e.what();
-                this->status=500;
-            }catch(const std::exception& e)
-            {
-                this->emsg = e.what();
-                this->status=500;
-                std::cerr << e.what() << '\n';
             }
             return value;
         }

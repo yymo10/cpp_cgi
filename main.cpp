@@ -3,6 +3,7 @@
 #include<string>
 int main() { 
     CGI cgi;
+    cgi.SESSION_ID();
     HtmlHeader("ja","UTF-8","テスト");
         v("<h1>GET Data</h1>");
         v(cgi.GET_("test"));
