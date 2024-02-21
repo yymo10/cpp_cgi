@@ -213,9 +213,9 @@ class CGI{
             }catch(const std::runtime_error& e){
                 this->emsg = e.what();
                 this->status=500;
-            }
-            catch(const std::exception& e)
-            {
+            }catch(const std::exception& e){
+                this->emsg = e.what();
+                this->status=500;
                 std::cerr << e.what() << '\n';
             }
             return ref;
@@ -273,5 +273,29 @@ class CGI{
                 std::cerr << e.what() << '\n';
             }
             return id;
+        }
+        /**
+         * USERAGENT_　メゾット
+         * @return {string} : 取得したUserAgentを返すメゾット
+        */
+        std::string USERAGENT_(){
+            std::string useragent;
+            try
+            {
+                const char* referer = getenv("HTTP_USER_AGENT");
+                if (referer == nullptr) {
+                    throw std::runtime_error("Error:Error:UserAgent is not set.");
+                    return "";
+                } else {
+                    useragent = std::string(referer);
+                }
+            }catch(const std::runtime_error& e){
+                this->emsg = e.what();
+                this->status=500;
+            }catch(const std::exception& e){
+                this->emsg = e.what();
+                this->status=500;
+                std::cerr << e.what() << '\n';
+            }
         }
 };
