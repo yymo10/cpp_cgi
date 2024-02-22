@@ -12,8 +12,12 @@
 #include <sstream>
 #include <ctime>
 #include <vector>
+#include <iomanip>
+#include <chrono>
+#include <fstream>
 /**
  * HtmlHead 関数
+ * 基本的なHTMLのHeadを設定します。
  * @param {string} lang : HTML文書の言語を指定する文字列です。例えば、"en"や"ja"など。
  * @param {string} charset : 文書で使用される文字セットを指定します。例えば、"UTF-8"。
  * @param {string} title : HTML文書のタイトルを指定する文字列です。
@@ -99,7 +103,7 @@ void system_info(){
                std::cout <<"<th style='text-align: left;'>" << env_vars[i] << "</th>" << std::endl;
                std::cout <<"<td>"<< value << "</td>";
         } else {
-                std::cout <<"<th>" << env_vars[i] << "</th>" << std::endl;
+                std::cout <<"<th  style='text-align: left;'>" << env_vars[i] << "</th>" << std::endl;
                std::cout <<"<td>"<< "Not Set;" << "</td>";
         }
         std::cout <<"</tr>" <<std::endl;
@@ -146,6 +150,11 @@ class CGI{
                 this->status=500;
             }
         }
+        /**
+         * error_msg　メゾット
+         * エラーメッセージをテキストで返すメゾット
+         * @return { string } : エラーメッセージを連結して文字列として返します。
+        */
         std::string error_msg(){
             std::string view;
             std::vector<std::string> msg;
@@ -169,9 +178,42 @@ class CGI{
             }
            return view;
         }
+        /**
+         * error_log　メゾット
+         * エラーメッセージをログとして出力します。
+         * @param {string} : ログファイル格納のパス
+         * @param {string} : ログファイル名を指定
+         * @param {date_format} : エラーログに出力する日付、時間のフォーマットを指定（例：　"%Y-%m-%d %H:%M:%S"）
+         * @return { void }
+        */
+        void error_log(std::string path,std::string fname,std::string date_format){
+            std::ofstream logfile(path + fname);
+            std::vector<std::string> msg;
+            try{
+                msg = this->emsg;
+                if(!logfile){
+                    std::cerr << "ファイルを開けませんでした。" << std::endl;
+                    std::runtime_error("Error: File is missing or cannot be opened.");
+                }
+                for(int i=0;i < msg.size();i++){
+                    auto now = std::chrono::system_clock::now();
+                    time_t tt = std::chrono::system_clock::to_time_t(now);
+                    struct tm *ptm = localtime(&tt);
+                    logfile << std::put_time(ptm, date_format.c_str()) <<" [error code: "<< this->status <<"; IP Address: "<< this->REMOTE_IP_ADDR() << "]"<< this->emsg[i]<< std::endl;
+                }
+            }catch(const std::runtime_error& e){
+                std::cerr << e.what() << std::endl;
+                this->emsg.push_back(e.what());
+            }catch(const std::exception& e){
+                std::cerr << e.what() << '\n';
+                this->emsg.push_back(e.what());
+                this->status=500;
+            }
+            logfile.close();
+        }
         std::map<std::string, std::string> parseQueryString() {
             std::map<std::string, std::string> data;
-            std::string query_string = getenv("QUERY_STRING"); // 環境変数からQUERY_STRINGを取得
+            std::string query_string = getenv("QUERY_STRING");
 
             std::string key, value;
             try{
@@ -208,7 +250,7 @@ class CGI{
         */
         std::map<std::string, std::string> parse_post_data() {
             std::string post_data;
-            std::cin >> post_data; // POSTデータを標準入力から読み取る
+            std::cin >> post_data;
 
             std::map<std::string, std::string> data_map;
             try{
@@ -292,7 +334,6 @@ class CGI{
                 }
             }catch(const std::runtime_error& e){
                 this->emsg.push_back(e.what());
-                this->status=500;
             }catch(const std::exception& e){
                 this->emsg.push_back(e.what());
                 this->status=500;
@@ -308,15 +349,12 @@ class CGI{
         std::string REQUEST_(std::string param){
             const char* method = std::getenv("REQUEST_METHOD");
             std::string value;
-            if (method != nullptr) { // 環境変数が設定されているか確認
+            if (method != nullptr) {
                 std::string requestMethod(method);
-
                 if (requestMethod == "GET") {
-                    // GETリクエストの場合の処理
-                value = this->GET_(param);
+                    value = this->GET_(param);
                 } else if (requestMethod == "POST") {
-                    // POSTリクエストの場合の処理
-                value = this->POST_(param);
+                    value = this->POST_(param);
                 }
             }
             return value;
