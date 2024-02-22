@@ -40,15 +40,29 @@ void JsonHeader(std::string charset="utf-8"){
 void HtmlFooter(){
     std::cout <<"</body></html>" << std::endl;
 }
+/**
+ * v 関数
+ * テキストを挿入する関数
+ * @return {void}
+*/
 template<typename T>
 void v(T view){
         std::cout << view << std::endl;
 }
+/**
+ * vln 関数
+ * テキストと改行を挿入する関数
+ * @return {void}
+*/
 template<typename T>
 void vln(T view){
         std::cout << view << "<br />" << std::endl;
 }
-
+/**
+ * system_info 関数
+ * 環境変数を一覧表示する関数
+ * @return {void}
+*/
 void system_info(){
     const char* env_vars[] = {
         "CONTENT_LENGTH",
@@ -75,7 +89,7 @@ void system_info(){
         "SERVER_PROTOCOL",
         "SERVER_SIGNATURE",
         "SERVER_SOFTWARE",
-        nullptr // リストの終わりを示す
+        nullptr
     };
     std::cout <<"<table>" << std::endl;
     for (int i = 0; env_vars[i] != nullptr; ++i) {
