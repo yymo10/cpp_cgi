@@ -1,8 +1,8 @@
 /**
  * CGI Library for C++
- * 
  * License : MIT
- * 
+ * Author : @yymo10 (YoheiYamamoto)
+ * Remote Repository : https://github.com/yymo10/cpp_cgi
 */
 
 #include <iostream>
@@ -11,6 +11,7 @@
 #include <map>
 #include <sstream>
 #include <ctime>
+#include <vector>
 /**
  * HtmlHead 関数
  * @param {string} lang : HTML文書の言語を指定する文字列です。例えば、"en"や"ja"など。
@@ -26,6 +27,7 @@ void HtmlHeader(std::string lang,std::string charset,std::string title,std::stri
 /**
  * JsonHeader 関数
  * @param {string} charset : 文字セットを設定する（初期値はutf-8）
+ * @return {void}
 */
 void JsonHeader(std::string charset="utf-8"){
     std::cout << "Content-type: application/json;charset="<< charset <<"\n\n";
@@ -42,10 +44,58 @@ template<typename T>
 void v(T view){
         std::cout << view << std::endl;
 }
+template<typename T>
+void vln(T view){
+        std::cout << view << "<br />" << std::endl;
+}
+
+void system_info(){
+    const char* env_vars[] = {
+        "CONTENT_LENGTH",
+        "CONTENT_TYPE",
+        "DOCUMENT_ROOT",
+        "GATEWAY_INTERFACE",
+        "HTTP_ACCEPT",
+        "HTTP_COOKIE",
+        "HTTP_HOST",
+        "HTTP_REFERER",
+        "HTTP_USER_AGENT",
+        "PATH",
+        "QUERY_STRING",
+        "REMOTE_ADDR",
+        "REMOTE_PORT",
+        "REQUEST_METHOD",
+        "REQUEST_URI",
+        "SCRIPT_FILENAME",
+        "SCRIPT_NAME",
+        "SERVER_ADDR",
+        "SERVER_ADMIN",
+        "SERVER_NAME",
+        "SERVER_PORT",
+        "SERVER_PROTOCOL",
+        "SERVER_SIGNATURE",
+        "SERVER_SOFTWARE",
+        nullptr // リストの終わりを示す
+    };
+    std::cout <<"<table>" << std::endl;
+    for (int i = 0; env_vars[i] != nullptr; ++i) {
+        const char* value = std::getenv(env_vars[i]);
+        std::cout <<"<tr>" <<std::endl;
+        if (value != nullptr) {
+               std::cout <<"<th style='text-align: left;'>" << env_vars[i] << "</th>" << std::endl;
+               std::cout <<"<td>"<< value << "</td>";
+        } else {
+                std::cout <<"<th>" << env_vars[i] << "</th>" << std::endl;
+               std::cout <<"<td>"<< "Not Set;" << "</td>";
+        }
+        std::cout <<"</tr>" <<std::endl;
+    }
+    std::cout <<"</table>";
+}
 
 class CGI{
             std::string sessionId_;
-            std::string emsg;
+            std::vector<std::string> emsg;
         public:
         int status;
         CGI(){
@@ -57,11 +107,11 @@ class CGI{
                 this->status=200;
             }catch(const std::runtime_error& e){
                 std::cerr << e.what() << std::endl;
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }catch(const std::exception& e){
                 std::cerr << e.what() << '\n';
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }
         }
@@ -74,28 +124,36 @@ class CGI{
                 this->status=200;
             }catch(const std::runtime_error& e){
                 std::cerr << e.what() << std::endl;
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }catch(const std::exception& e){
                 std::cerr << e.what() << '\n';
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }
         }
         std::string error_msg(){
-            std::string msg;
+            std::string view;
+            std::vector<std::string> msg;
             try{
                 msg = this->emsg;
             }catch(const std::runtime_error& e){
                 std::cerr << e.what() << std::endl;
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }catch(const std::exception& e){
                 std::cerr << e.what() << '\n';
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }
-            return msg;
+            if(msg.size()==1){
+                view = msg[0];
+            }else{
+                for(int i=0;i <= msg.size()-1;i++){
+                    view += msg[i];
+                }
+            }
+           return view;
         }
         std::map<std::string, std::string> parseQueryString() {
             std::map<std::string, std::string> data;
@@ -120,11 +178,11 @@ class CGI{
                 this->status=200;
             }catch(const std::runtime_error& e){
                 std::cerr << e.what() << std::endl;
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }catch(const std::exception& e){
                 std::cerr << e.what() << '\n';
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }
             return data;
@@ -153,11 +211,11 @@ class CGI{
                 this->status=200;
             }catch(const std::runtime_error& e){
                 std::cerr << e.what() << std::endl;
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }catch(const std::exception& e){
                 std::cerr << e.what() << '\n';
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }
             return data_map;
@@ -191,13 +249,13 @@ class CGI{
                 }
             }catch(const std::runtime_error& e){
                 std::cerr << e.what() << std::endl;
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }
             catch(const std::exception& e)
             {
                 std::cerr << e.what() << std::endl;
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
                 std::cerr << e.what() << '\n';
             }
@@ -219,10 +277,10 @@ class CGI{
                     ref = std::string(referer);
                 }
             }catch(const std::runtime_error& e){
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }catch(const std::exception& e){
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
                 std::cerr << e.what() << '\n';
             }
@@ -272,11 +330,11 @@ class CGI{
                 }
                 this->status=200;
             }catch(const std::runtime_error& e){
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }catch(const std::exception& e)
             {
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
                 std::cerr << e.what() << '\n';
             }
@@ -290,7 +348,7 @@ class CGI{
             std::string useragent;
             try
             {
-                const char* referer = getenv("HTTP_USER_AGENT");
+                const char* referer = std::getenv("HTTP_USER_AGENT");
                 if (referer == nullptr) {
                     throw std::runtime_error("Error:Error:UserAgent is not set.");
                     return "";
@@ -298,13 +356,90 @@ class CGI{
                     useragent = std::string(referer);
                 }
             }catch(const std::runtime_error& e){
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
             }catch(const std::exception& e){
-                this->emsg = e.what();
+                this->emsg.push_back(e.what());
                 this->status=500;
                 std::cerr << e.what() << '\n';
             }
             return useragent;
         }
+        /**
+         * REMOTE_IP_ADDR　メゾット
+         * @return {string} : 取得したアクセス元のIPアドレスを返すメゾット
+        */
+        std::string REMOTE_IP_ADDR(){
+            std::string ipaddress;
+            try
+            {
+                const char* referer = std::getenv("REMOTE_ADD");
+                if (referer == nullptr) {
+                    throw std::runtime_error("Error: Remote IP address is not set.");
+                    return "";
+                } else {
+                    ipaddress = std::string(referer);
+                }
+            }catch(const std::runtime_error& e){
+                this->emsg.push_back(e.what());
+                this->status=500;
+            }catch(const std::exception& e){
+                this->emsg.push_back(e.what());
+                this->status=500;
+                std::cerr << e.what() << '\n';
+            }
+            return ipaddress;
+        }
+        /**
+         * DOCUMENT_ROOT　メゾット
+         * @return {string} : ドキュメントのルートディレクトリ（絶対パス）を返すメゾット
+        */
+        std::string DOCUMENT_ROOT(){
+            std::string document_root;
+            try
+            {
+                const char* referer = std::getenv("DOCUMENT_ROOT");
+                if (referer == nullptr) {
+                    throw std::runtime_error("Error: DOCUMENT_ROOT is not set.");
+                    return "";
+                } else {
+                    document_root = std::string(referer);
+                }
+            }catch(const std::runtime_error& e){
+                this->emsg.push_back(e.what());
+                this->status=500;
+            }catch(const std::exception& e){
+                this->emsg.push_back(e.what());
+                this->status=500;
+                std::cerr << e.what() << '\n';
+            }
+            return document_root;
+        }
+        
+        /**
+         * SCRIPT_FILENAME　メゾット
+         * @return {string} : 実行しているCGIスクリプトのファイル名を絶対パスと一緒に返すメゾット
+        */
+        std::string SCRIPT_FILENAME(){
+            std::string script_filename;
+            try
+            {
+                const char* referer = std::getenv("SCRIPT_FILENAME");
+                if (referer == nullptr) {
+                    throw std::runtime_error("Error: Script File Name is not set.");
+                    return "";
+                } else {
+                    script_filename = std::string(referer);
+                }
+            }catch(const std::runtime_error& e){
+                this->emsg.push_back(e.what());
+                this->status=500;
+            }catch(const std::exception& e){
+                this->emsg.push_back(e.what());
+                this->status=500;
+                std::cerr << e.what() << '\n';
+            }
+            return script_filename;
+        }
+        
 };
