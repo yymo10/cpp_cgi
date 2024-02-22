@@ -187,7 +187,7 @@ class CGI{
          * @return { void }
         */
         void error_log(std::string path,std::string fname,std::string date_format){
-            std::ofstream logfile(path + fname);
+            std::ofstream logfile(path + fname,std::ios::app);
             std::vector<std::string> msg;
             try{
                 msg = this->emsg;
