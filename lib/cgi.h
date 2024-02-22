@@ -1,3 +1,10 @@
+/**
+ * CGI Library for C++
+ * 
+ * License : MIT
+ * 
+*/
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -6,10 +13,11 @@
 #include <ctime>
 /**
  * HtmlHead 関数
- * @param {string} lang HTML文書の言語を指定する文字列です。例えば、"en"や"ja"など。
- * @param {string} charset 文書で使用される文字セットを指定します。例えば、"UTF-8"。
- * @param {string} title HTML文書のタイトルを指定する文字列です。
- * @param {string} head そのほか追加したいheadの内容を記載
+ * @param {string} lang : HTML文書の言語を指定する文字列です。例えば、"en"や"ja"など。
+ * @param {string} charset : 文書で使用される文字セットを指定します。例えば、"UTF-8"。
+ * @param {string} title : HTML文書のタイトルを指定する文字列です。
+ * @param {string} head : そのほか追加したいheadの内容を記載
+ * @return {void}
  */
 void HtmlHeader(std::string lang,std::string charset,std::string title,std::string head=""){
        std::cout << "Content-type: text/html\n\n";
@@ -297,5 +305,6 @@ class CGI{
                 this->status=500;
                 std::cerr << e.what() << '\n';
             }
+            return useragent;
         }
 };
