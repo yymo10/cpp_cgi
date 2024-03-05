@@ -1,9 +1,9 @@
-/**
+/**********************************************************
  * CGI Library for C++
  * License : MIT
  * Author : @yymo10 (YoheiYamamoto)
  * Remote Repository : https://github.com/yymo10/cpp_cgi
-*/
+ **********************************************************/
 
 #include <iostream>
 #include <cstdlib>
@@ -111,13 +111,16 @@ void system_info(){
 class CGI{
             std::string sessionId_;
             std::vector<std::string> emsg;
-        public:
-        int status;
-        CGI(){
+                    /**
+         * GenerateSessionId メゾット
+         * sessionId_にセッションIDの乱数を生成代入（CGIクラスのインスタンスで初期化実行）
+        */
+        void GenerateSessionId() {
+            srand(time(0));
+            sessionId_ = std::to_string(rand());
             try{
-                GenerateSessionId();
                 if(sessionId_==""){
-                    throw std::runtime_error("Error: Session ID is not initialized.");
+                        throw std::runtime_error("Error: Session ID is not initialized.");
                 }
                 this->status=200;
             }catch(const std::runtime_error& e){
@@ -130,22 +133,10 @@ class CGI{
                 this->status=500;
             }
         }
-        ~CGI(){
-            try{
-                GenerateSessionId();
-                if(sessionId_==""){
-                    throw std::runtime_error("Error: Session ID is not initialized.");
-                }
-                this->status=200;
-            }catch(const std::runtime_error& e){
-                std::cerr << e.what() << std::endl;
-                this->emsg.push_back(e.what());
-                this->status=500;
-            }catch(const std::exception& e){
-                std::cerr << e.what() << '\n';
-                this->emsg.push_back(e.what());
-                this->status=500;
-            }
+        public:
+        int status;
+        CGI(){
+                this->GenerateSessionId();
         }
         /**
          * error_msg　メゾット
@@ -322,14 +313,6 @@ class CGI{
                 }
             }
             return value;
-        }
-        /**
-         * GenerateSessionId メゾット
-         * sessionId_にセッションIDの乱数を生成代入（CGIクラスのインスタンスで初期化実行）
-        */
-        void GenerateSessionId() {
-            srand(time(0));
-            sessionId_ = std::to_string(rand());
         }
         /**
          * SESSION_ID　メゾット
