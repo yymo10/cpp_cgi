@@ -14,16 +14,11 @@
 #include <vector>
 /**
  * HtmlHead 関数
- * 基本的なHTMLのHeadを設定します。
- * @param {string} lang : HTML文書の言語を指定する文字列です。例えば、"en"や"ja"など。
  * @param {string} charset : 文書で使用される文字セットを指定します。例えば、"UTF-8"。
- * @param {string} title : HTML文書のタイトルを指定する文字列です。
- * @param {string} head : そのほか追加したいheadの内容を記載
  * @return {void}
  */
-void HtmlHeader(std::string lang,std::string charset,std::string title,std::string head=""){
-       std::cout << "Content-type: text/html\n\n";
-       std::cout << "<!DOCTYPE html><html lang="+lang+"><head><meta charset="+charset+"><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>"+title+"</title>"+head+"</head>";
+void HtmlHeader(std::string charset="utf-8"){
+       std::cout << "Content-type: text/html;charset="<<charset<<"\n\n";
 }
 /**
  * JsonHeader 関数
