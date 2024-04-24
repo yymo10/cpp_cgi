@@ -3,6 +3,7 @@
  * License : MIT
  * Author : @yymo10 (YoheiYamamoto)
  * Remote Repository : https://github.com/yymo10/cpp_cgi
+ * WebSite : https://www.sb-i.jp/cpplib/
  **********************************************************/
 
 #include <iostream>
