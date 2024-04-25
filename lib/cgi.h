@@ -44,7 +44,7 @@ void HtmlFooter(){
 */
 template<typename T>
 void v(T view){
-        std::cout << view << std::endl;
+        std::cout << view << "\n";
 }
 /**
  * vln 関数
@@ -53,7 +53,7 @@ void v(T view){
 */
 template<typename T>
 void vln(T view){
-        std::cout << view << "<br />" << std::endl;
+        std::cout << view << "<br />" << "\n";
 }
 /**
  * system_info 関数
