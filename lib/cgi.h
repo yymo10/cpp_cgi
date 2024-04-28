@@ -437,6 +437,10 @@ class CGI{
             return script_filename;
         }
         std::vector<std::string> error_msg_map(){
-            return this->emsg;
+            if(this->emsg.size()<=1){
+                return this->emsg;
+            }else{
+                return;
+            }
         }
 };
