@@ -436,6 +436,10 @@ class CGI{
             }
             return script_filename;
         }
+        /**
+         * error_msg_map　メゾット
+         * @return {vector<string>} : エラーメッセージを取得 
+        */
         std::vector<std::string> error_msg_map(){
             if(this->emsg.size()<=1){
                 return this->emsg;
