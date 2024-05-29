@@ -106,8 +106,8 @@ void system_info(){
 
 class CGI{
             std::string sessionId_;
-            std::vector<std::string> emsg;
-                    /**
+
+         /**
          * GenerateSessionId メゾット
          * sessionId_にセッションIDの乱数を生成代入（CGIクラスのインスタンスで初期化実行）
         */
@@ -129,10 +129,12 @@ class CGI{
                 this->status=500;
             }
         }
+        protected:
+            std::vector<std::string> emsg;
         public:
-        int status;
+            int status;
         CGI(){
-                this->GenerateSessionId();
+            this->GenerateSessionId();
         }
         /**
          * error_msg　メゾット
@@ -447,4 +449,38 @@ class CGI{
                 return;
             }
         }
+};
+class Auth : CGI{
+private:
+    std::string token;
+public:
+    bool status_;
+    Auth(std::string token_):token(token_){
+        try{
+            const char* auth = std::getenv("HTTP_AUTHORIZATION");
+            if (auth) {
+                if(auth==this->token){
+                    this->status_=true;
+                }else{
+                    this->status_ = false;
+                    throw std::runtime_error("Authotization Token Error: Authentication token does not match.");
+                }
+            } else {
+                this->status = false;
+                throw std::runtime_error("Authotization Token Error: Cannot find authentication token.");
+            }
+        }catch(const std::runtime_error& e){
+                this->emsg.push_back(e.what());
+                this->status=401;
+        }catch(const std::exception& e){
+                this->emsg.push_back(e.what());
+                this->status=401;
+                std::cerr << e.what() << '\n';
+        }
+    }
+    bool check(){
+        if(this->status_!=NULL){
+            return this->status_;
+        }
+    }
 };
