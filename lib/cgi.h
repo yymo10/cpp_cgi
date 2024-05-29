@@ -450,7 +450,6 @@ class CGI{
             }
         }
 };
-
 class Auth : CGI{
 private:
     std::string token;
