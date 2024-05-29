@@ -3,6 +3,10 @@
 #include<string>
 int main() { 
     CGI cgi;
+    Auth auth("100002a");
+    if(auth.check()==true){
+        v("success");
+    }
     cgi.SESSION_ID();
     HtmlHeader();
         v("<a href='http://localhost:8888/cgi-bin/main-out.cgi'>Ref</a>");
